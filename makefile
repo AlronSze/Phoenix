@@ -19,29 +19,31 @@ C_SRC += $(wildcard uCOS-II/Source/*.c)
 C_SRC += $(wildcard Project/User/*.c)
 OBJS += $(patsubst %.c, %.o, $(C_SRC))
 DEPS += $(patsubst %.c, %.d, $(C_SRC))
+LSTS += $(patsubst %.c, %.lst, $(C_SRC))
 
 ASM_SRC += $(wildcard Libraries/CMSIS/gcc/*.s)
 ASM_SRC += $(wildcard uCOS-II/Port/gcc/*.s)
 OBJS += $(patsubst %.s, %.o, $(ASM_SRC))
 DEPS += $(patsubst %.s, %.d, $(ASM_SRC))
+LSTS += $(patsubst %.s, %.lst, $(ASM_SRC))
 
-CFLAGS += -g -O0 -std=c99 -Wall
+CFLAGS += -g -O0 -Wall
 CFLAGS += -mcpu=cortex-m4
+CFLAGS += -mapcs-frame -mapcs-stack-check
 CFLAGS += -mthumb -mthumb-interwork
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 CFLAGS += -ffunction-sections -fdata-sections
 
-AFLAGS += -W
+# AFLAGS += -g
 AFLAGS += -mcpu=cortex-m4
 AFLAGS += -mthumb -mthumb-interwork
 AFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
-# AFLAGS += -a
 
 LFLAGS += -mcpu=cortex-m4
 LFLAGS += -mthumb -mthumb-interwork
 LFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 LFLAGS += -Wl,--gc-sections
-LFLAGS += --specs=nano.specs --specs=rdimon.specs #--specs=nosys.specs 
+LFLAGS += --specs=nano.specs --specs=rdimon.specs #--specs=nosys.specs
 
 ###########################################################
 
@@ -53,9 +55,10 @@ clean:
 
 move:
 	@rm -rf $(OUTPUT)
-	@mkdir $(OUTPUT) $(OUTPUT)/obj $(OUTPUT)/dep $(OUTPUT)/bin
+	@mkdir $(OUTPUT) $(OUTPUT)/obj $(OUTPUT)/dep $(OUTPUT)/lst $(OUTPUT)/bin
 	@mv $(OBJS) $(OUTPUT)/obj/
 	@mv $(DEPS) $(OUTPUT)/dep/
+	@mv $(LSTS) $(OUTPUT)/lst/
 	@mv $(PROJECT).hex $(PROJECT).elf $(PROJECT).map $(OUTPUT)/bin/
 	@rm -f $(PROJECT).elf.strip
 
@@ -77,8 +80,8 @@ $(PROJECT).elf: $(OBJS)
 
 %.o: %.s
 	@echo " [AS] $@"
-	@${TOOLPREFIX}as $(AFLAGS) -c $< -o $@ --MD $(@:.o=.d)
+	@${TOOLPREFIX}as $(AFLAGS) -c $< -o $@ --MD $(@:.o=.d) -alhms=$(@:.o=.lst)
 
 %.o: %.c
 	@echo " [CC] $@"
-	@${TOOLPREFIX}gcc $(CFLAGS) $(DEFS) $(INCS) -c $< -o $@ -MD -MF $(@:.o=.d) -MP
+	@${TOOLPREFIX}gcc $(CFLAGS) $(DEFS) $(INCS) -c $< -o $@ -MD -MF $(@:.o=.d) -MP -Wa,-alhms=$(@:.o=.lst)
