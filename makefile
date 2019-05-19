@@ -27,23 +27,24 @@ OBJS += $(patsubst %.s, %.o, $(ASM_SRC))
 DEPS += $(patsubst %.s, %.d, $(ASM_SRC))
 LSTS += $(patsubst %.s, %.lst, $(ASM_SRC))
 
-CFLAGS += -g -O0 -Wall
+# CFLAGS += -g3
+CFLAGS += -O0 -Wall
 CFLAGS += -mcpu=cortex-m4
-CFLAGS += -mapcs-frame -mapcs-stack-check
-CFLAGS += -mthumb -mthumb-interwork
+CFLAGS += -mthumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 CFLAGS += -ffunction-sections -fdata-sections
 
 # AFLAGS += -g
 AFLAGS += -mcpu=cortex-m4
-AFLAGS += -mthumb -mthumb-interwork
+AFLAGS += -mthumb
 AFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 LFLAGS += -mcpu=cortex-m4
-LFLAGS += -mthumb -mthumb-interwork
+LFLAGS += -mthumb
 LFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 LFLAGS += -Wl,--gc-sections
 LFLAGS += --specs=nano.specs --specs=rdimon.specs #--specs=nosys.specs
+# LFLAGS += -static -Wl,--start-group -lc -lm -Wl,--end-group
 
 ###########################################################
 
@@ -61,6 +62,9 @@ move:
 	@mv $(LSTS) $(OUTPUT)/lst/
 	@mv $(PROJECT).hex $(PROJECT).elf $(PROJECT).map $(OUTPUT)/bin/
 	@rm -f $(PROJECT).elf.strip
+
+burn:
+	openocd -f Scripts/interface/stlink-v2-1.cfg  -f Scripts/target/stm32f4x.cfg -c init -c halt -c "flash write_image erase $(OUTPUT)/bin/$(PROJECT).hex" -c reset -c shutdown
 
 ###########################################################
 
