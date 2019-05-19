@@ -98,7 +98,7 @@ void MPU6050_Init(void)
     // Enable FIFO operation
     I2C_WriteByte(MPU6050_Addr, USER_CTRL, 0x40);
 
-    // Set the gyroscope acquisition range to +-500¡ã/s
+    // Set the gyroscope acquisition range to +-500Â°/s
     I2C_WriteByte(MPU6050_Addr, GYRO_CONFIG, 0x0B);
     // Set the accelerometer acquisition range to +-4g
     I2C_WriteByte(MPU6050_Addr, ACCEL_CONFIG, 0x08);
