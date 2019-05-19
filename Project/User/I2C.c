@@ -4,24 +4,24 @@
 #include "delay.h"
 #include "I2C.h"
 
-// I2C初始化，使用模拟I2C
+// I2C initialization. Use analog I2C
 void I2C1_Init(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
     
-    // 时钟开启
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+    // Enable GPIOB clock
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
-    // GPIO配置，开漏输出
+    // GPIO configuration, Open-drain output
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; 
     GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
     GPIO_InitStructure.GPIO_Speed = GPIO_High_Speed;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; 
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
-// I2C模拟开始
+// I2C start
 u8 I2C_START(void)
 {
     I2C_SDA_H;
@@ -45,7 +45,7 @@ u8 I2C_START(void)
     return I2C_READY;
 }
 
-// I2C模拟停止
+// I2C stop
 void I2C_STOP(void)
 {
     I2C_SDA_L;
@@ -58,7 +58,7 @@ void I2C_STOP(void)
     I2C_NOP;
 }
 
-// I2C模拟发送ACK
+// I2C send ACK
 void I2C_SendACK(void)
 {
     I2C_SDA_L;
@@ -69,7 +69,7 @@ void I2C_SendACK(void)
     I2C_NOP;
 }
 
-// I2C模拟发送NACK
+// I2C send NACK
 void I2C_SendNACK(void)
 {
     I2C_SDA_H;
@@ -80,7 +80,7 @@ void I2C_SendNACK(void)
     I2C_NOP;
 }
 
-// I2C模拟发送一个字节
+// I2C send one byte
 u8 I2C_SendByte(u8 i2c_data)
 {
     u8 i;
@@ -118,7 +118,7 @@ u8 I2C_SendByte(u8 i2c_data)
     }
 }
 
-// I2C模拟接收一个字节
+// I2C receive one byte
 u8 I2C_ReceiveByte(void)
 {
     u8 i,i2c_data;
@@ -143,7 +143,7 @@ u8 I2C_ReceiveByte(void)
     return i2c_data;
 }
 
-// I2C模拟接收一个字节并发送ACK
+// I2C receive one byte with ACK
 u8 I2C_ReceiveByte_WithACK(void)
 {
     u8 i,i2c_data;
@@ -168,7 +168,7 @@ u8 I2C_ReceiveByte_WithACK(void)
     return i2c_data;
 }
 
-// I2C模拟写一个字节
+// I2C write one byte
 void I2C_WriteByte(uint8_t DeviceAddr, uint8_t address, uint8_t data)
 {
     I2C_START();
@@ -178,7 +178,7 @@ void I2C_WriteByte(uint8_t DeviceAddr, uint8_t address, uint8_t data)
     I2C_STOP();
 }
 
-// I2C模拟写入一个字节（无需寄存器地址）
+// I2C write one byte without address
 void I2C_NoAddr_WriteByte(uint8_t DeviceAddr, uint8_t data)
 {
     I2C_START();
@@ -187,7 +187,7 @@ void I2C_NoAddr_WriteByte(uint8_t DeviceAddr, uint8_t data)
     I2C_STOP();
 }
 
-// I2C模拟读出一个字节
+// I2C read one byte
 uint8_t I2C_ReadByte(uint8_t DeviceAddr, uint8_t address)
 {
     uint8_t i;
@@ -201,7 +201,7 @@ uint8_t I2C_ReadByte(uint8_t DeviceAddr, uint8_t address)
     return i;
 }
 
-// I2C模拟读出两个字节
+// I2C read two bytes
 uint16_t I2C_Read_2Bytes(uint8_t DeviceAddr, uint8_t address)
 {
     uint8_t data_temp1,data_temp2;
@@ -220,7 +220,7 @@ uint16_t I2C_Read_2Bytes(uint8_t DeviceAddr, uint8_t address)
     return data_16;
 }
 
-// I2C模拟读出三个字节
+// I2C read three bytes
 uint32_t I2C_Read_3Bytes(uint8_t DeviceAddr, uint8_t address)
 {
     uint8_t data_temp1, data_temp2, data_temp3;
@@ -240,7 +240,7 @@ uint32_t I2C_Read_3Bytes(uint8_t DeviceAddr, uint8_t address)
     return data_32;
 }
 
-// I2C模拟写入多个字节
+// I2C write multiple bytes
 u8 i2cwrite(u8 dev_addr, u8 reg_addr, u8 i2c_len, u8 *i2c_data_buf)
 {
     u8 i;
@@ -254,7 +254,7 @@ u8 i2cwrite(u8 dev_addr, u8 reg_addr, u8 i2c_len, u8 *i2c_data_buf)
     return 0x00;
 }
 
-// I2C模拟读出多个字节
+// I2C read multiple bytes
 u8 i2cread(u8 dev_addr, u8 reg_addr, u8 i2c_len, u8 *i2c_data_buf)
 {
     I2C_START();

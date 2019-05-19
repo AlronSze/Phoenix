@@ -1,7 +1,7 @@
 #include "stm32f4xx.h"
 
-// 变量链接
+// Extern variables
 extern uint8_t ComRxBuffer[4];
 
-// 函数定义
+// Functions definition
 void Get_COM(void);

@@ -1,7 +1,7 @@
 #include "stm32f4xx.h"
 #include "stdio.h"
 
-// º¯Êý¶¨Òå
+// Functions definition
 int fputc(int ch, FILE *f);
 int GetKey(void);
 

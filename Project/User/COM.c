@@ -4,26 +4,26 @@
 #include "USART.h"
 #include "delay.h"
 
-// 上位机命令存放数组
+// Array for storing command from host
 uint8_t ComRxBuffer[4] = {0};
 
-// 获取上位机命令
+// Get the command from upper computer
 void Get_COM(void)
 {
-    // 命令帧格式鉴别
+    // Command frame checking
     if (ComRxBuffer[0] == 0x8A && ComRxBuffer[1] == 0xFE && ComRxBuffer[3] == 0xFC)
     {
-        // 命令识别示范，因调节完PID后此通信功能暂不使用，等待未来加入
+        // Temporarily useless. Wait to add functions in the future
         if (ComRxBuffer[2] == 0x01)
         {
-            // 此处加入功能
+            // TODO: Add some functions
         }
         else if (ComRxBuffer[2] == 0x02)
         {
-            // 此处加入功能
+            // TODO: Add some functions
         }
         
-        // 命令清除
+        // Clear command
         ComRxBuffer[0] = 0;
         ComRxBuffer[1] = 0;
         ComRxBuffer[2] = 0;

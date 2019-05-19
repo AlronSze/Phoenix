@@ -1,33 +1,33 @@
-// 头文件
+// Header
 #include <includes.h>
 
-// 堆栈分配
+// Stack allocation
 static OS_STK Task_Startup_STK[TASK_STARTUP_STK_SIZE];
 static OS_STK Task_Angel_STK[TASK_ANGEL_STK_SIZE];
 static OS_STK Task_PID_STK[TASK_PID_STK_SIZE];
 static OS_STK Task_COM_STK[TASK_COM_STK_SIZE];
 
-// 函数定义
+// Functions definition
 static void OS_Systick_Init(void);
 static void Task_Startup(void *p_arg);
 static void Task_Angel(void *p_arg);
 static void Task_PID(void *p_arg);
 static void Task_COM(void *p_arg);
 
-// 主函数
+// Main function
 int main(void)
 {
-    // 操作系统初始化
+    // OS initialization
     OSInit();
-    // 创建启动任务
+    // Create startup task
     OSTaskCreate(Task_Startup, (void *)0, &Task_Startup_STK[TASK_STARTUP_STK_SIZE - 1], TASK_STARTUP_PRIO);
-    // 运行操作系统
+    // Run OS
     OSStart();
-    
+
     return 0;
 }
 
-// 操作系统Systick初始化
+// OS systick initialization
 static void OS_Systick_Init(void)
 {
     RCC_ClocksTypeDef rcc_clocks;
@@ -35,66 +35,66 @@ static void OS_Systick_Init(void)
     SysTick_Config(rcc_clocks.HCLK_Frequency / OS_TICKS_PER_SEC);
 }
 
-// 启动任务函数
+// Function entry of startup task
 static void Task_Startup(void *p_arg)
 {
-    // 板级驱动初始化
+    // Board support package initialization
     BSP_Init();
-    // 操作系统Systick初始化
+    // OS systick initialization
     OS_Systick_Init();
 
-    // 检测CPU当前容量
+    // Detect OS task current capacity
     #if (OS_TASK_STAT_EN > 0)
         OSStatInit();
     #endif
 
-    // 创建功能任务
+    // Create functional task
     OSTaskCreate(Task_Angel, (void *)0, &Task_Angel_STK[TASK_ANGEL_STK_SIZE - 1], TASK_ANGEL_PRIO);
     OSTaskCreate(Task_PID, (void *)0, &Task_PID_STK[TASK_PID_STK_SIZE - 1], TASK_PID_PRIO);
     OSTaskCreate(Task_COM, (void *)0, &Task_COM_STK[TASK_COM_STK_SIZE - 1], TASK_COM_PRIO);
 
-    // 删除自身
+    // Delete itself
     OSTaskDel(OS_PRIO_SELF);
 }
 
-// 姿态解算任务
+// Function entry of AHRS task
 static void Task_Angel(void *p_arg)
 {
     while(1)
     {
-        // 获取传感器数据
+        // Get sensor data
         Get_AHRS_Data();
-        // 姿态更新
+        // Update attitude
         AHRS_Update(init_gx, init_gy, init_gz, init_ax, init_ay, init_az, init_mx, init_my, init_mz);
-        // 延时
+        // OS time delay 1 tick
         OSTimeDly(1);
     }
 }
 
-// PID控制任务
+// Function entry of PID control task
 static void Task_PID(void *p_arg)
 {
     while(1)
     {
-        // 遥控值处理
+        // Remote control value processing
         Motor_Expectation_Calculate(PWMInCh1, PWMInCh2, PWMInCh3, PWMInCh4);
-        // 电机PID计算
+        // Motor PID calculation
         Motor_Calculate();
-        // 输出控制电机
+        // Output PWM to motors
         PWM_Output(Motor_1, Motor_2, Motor_3, Motor_4);
-        // 延时
+        // OS time delay 5 ticks
         OSTimeDly(5);
     }
 }
 
-// 蓝牙/串口通信任务
+// Function entry of bluetooth/serial communication task
 static void Task_COM(void *p_arg)
 {
     while(1)
     {
-        // 获取上位机命令
+        // Get the command from upper computer
         Get_COM();
-        // 延时
+        // OS time delay 20 ticks
         OSTimeDly(20);
     }
 }

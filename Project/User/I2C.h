@@ -1,31 +1,31 @@
 #include "stm32f4xx.h"
 
-// 定义GPIO为I2C
-#define I2C_SCL 	       GPIO_Pin_8
-#define I2C_SDA 		     GPIO_Pin_9
+// I2C SCL/SDA macro definition
+#define I2C_SCL            GPIO_Pin_8
+#define I2C_SDA            GPIO_Pin_9
 
-// 定义SCL与SDA拉高拉低
-#define I2C_SCL_L 		   GPIO_ResetBits(GPIOB, I2C_SCL)
-#define I2C_SCL_H 		   GPIO_SetBits(GPIOB, I2C_SCL)
-#define I2C_SDA_L 		   GPIO_ResetBits(GPIOB, I2C_SDA)
-#define I2C_SDA_H   	   GPIO_SetBits(GPIOB, I2C_SDA)
+// I2C SCL/SDA set low/high macro definition
+#define I2C_SCL_L          GPIO_ResetBits(GPIOB, I2C_SCL)
+#define I2C_SCL_H          GPIO_SetBits(GPIOB, I2C_SCL)
+#define I2C_SDA_L          GPIO_ResetBits(GPIOB, I2C_SDA)
+#define I2C_SDA_H          GPIO_SetBits(GPIOB, I2C_SDA)
 
-// 定义读取SDA状态
-#define I2C_SDA_STATE    GPIO_ReadInputDataBit(GPIOB, I2C_SDA)
+// I2C SDA state macro definition
+#define I2C_SDA_STATE      GPIO_ReadInputDataBit(GPIOB, I2C_SDA)
 
-// 定义I2C当前状态
-#define I2C_READY		     0x00
-#define I2C_BUS_BUSY	   0x01	
-#define I2C_BUS_ERROR	   0x02
+// I2C state macro definition
+#define I2C_READY          0x00
+#define I2C_BUS_BUSY       0x01	
+#define I2C_BUS_ERROR      0x02
 
-// 定义I2C的ACK/NACK
-#define I2C_NACK	       0x00 
-#define I2C_ACK		       0x01
+// I2C ACK/NACK macro definition
+#define I2C_NACK           0x00 
+#define I2C_ACK            0x01
 
-// 定义I2C停顿
-#define I2C_NOP          delay_us(1)
+// I2C nop macro definition
+#define I2C_NOP            delay_us(1)
 
-// 函数定义
+// Functions definition
 void I2C1_Init(void);
 
 void I2C_WriteByte(uint8_t DeviceAddr, uint8_t address, uint8_t data);

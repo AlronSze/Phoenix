@@ -7,61 +7,61 @@
 #include "MPU6050.h"
 #include "COM.h"
 
-// 积分限幅大小
+// Integral limit
 #define INTEGRAL_MAX     200.0f
 #define INTEGRAL_MIN     -200.0f
 
-// PID输出限幅大小
+// PID out limit
 #define PID_OUTPUT_MAX   800.0f
 #define PID_OUTPUT_MIN   -800.0f
 
-// PWM输出限幅大小
+// PWM out limit
 #define PWM_OUT_MIN      875
 #define PWM_OUT_MAX      2000
 
-// PID更新时间
+// PID update time
 float Time_dt;
-// 欧拉角PID输出值
+// Euler angle PID output value
 float PID_Roll, PID_Pitch, PID_Yaw;
-// 电机转速
+// Motor speed
 uint16_t Motor_1, Motor_2, Motor_3, Motor_4;
 
-// 遥控值
+// Remote control value
 float Motor_Ail = 0.0;
 float Motor_Ele = 0.0;
 float Motor_Thr = 0.0;
 float Motor_Rud = 0.0;
-// 遥控中值
+// Remote control median value
 float Ail_Mid   = 1527.0;
 float Ele_Mid   = 1522.0;
 float Rud_Mid   = 1528.0;
 
-// Roll的PID参数
+// Roll PID parameters
 float Roll_Kp        = 1.9;
 float Roll_Rate_Kp   = 0.70;
 float Roll_Rate_Ti   = 0.10;
 float Roll_Rate_Td   = 0.01;
-// Pitch的PID参数
+// Pitch PID parameters
 float Pitch_Kp       = 2.4;
 float Pitch_Rate_Kp  = 0.70;
 float Pitch_Rate_Ti  = 0.10;
 float Pitch_Rate_Td  = 0.01;
-// Yaw的PID参数
+// Yaw PID parameters
 float Yaw_Kp         = 0.0;
 float Yaw_Rate_Kp    = 0.70;
 float Yaw_Rate_Ti    = 0.10;
 float Yaw_Rate_Td    = 0.01;
 
-// PID欧拉角总误差值
+// The sum of euler angle PID error
 float Roll_Err_Sum   = 0.0;
 float Pitch_Err_Sum  = 0.0;
 float Yaw_Err_Sum    = 0.0;
-// PID欧拉角上一次误差值
+// Last euler angle PID error
 float Roll_Err_Last  = 0.0;
 float Pitch_Err_Last = 0.0;
 float Yaw_Err_Last   = 0.0;
 
-// Roll的PID计算
+// Roll PID calculation
 void PID_Roll_Calculate(void)
 {
     float Proportion;
@@ -69,18 +69,18 @@ void PID_Roll_Calculate(void)
     float Derivative;
     float Error, Output;
 
-    // 外环结果输入内环作误差值
+    // Outer ring result is input to the inner ring as the error value
     Error = Roll_Kp * (Motor_Ail - Roll) + init_gy * 57.295780;
     
-    // 总误差
+    // The sum of error
     Roll_Err_Sum += Error;
     
-    // PID计算
+    // PID calculation
     Proportion = Roll_Rate_Kp * Error;
     Integral   = Roll_Rate_Ti * Roll_Err_Sum * Time_dt;
     Derivative = Roll_Rate_Td * (Error - Roll_Err_Last) / Time_dt;
     
-    // 积分限幅
+    // Integral limit
     if(Integral > INTEGRAL_MAX)
     {
         Integral = INTEGRAL_MAX;
@@ -90,10 +90,10 @@ void PID_Roll_Calculate(void)
         Integral = INTEGRAL_MIN;
     }
     
-    // PID之和为输出
+    // P + I + D = output
     Output = Proportion + Integral + Derivative;
 
-    // PID输出限幅
+    // PID output limit
     if(Output > PID_OUTPUT_MAX)
     {
         Output = PID_OUTPUT_MAX;
@@ -103,14 +103,14 @@ void PID_Roll_Calculate(void)
         Output = PID_OUTPUT_MIN;
     }
 
-    // 记录为上一次误差
+    // Record last error
     Roll_Err_Last = Error;
     
-    // 输出PID最终值
+    // Output PID value
     PID_Roll = Output;
 }
 
-// Pitch的PID计算
+// Pitch PID calculation
 void PID_Pitch_Calculate(void)
 {
     float Proportion;
@@ -151,7 +151,7 @@ void PID_Pitch_Calculate(void)
     PID_Pitch = Output;
 }
 
-// Yaw的PID计算
+// Yaw PID calculation
 void PID_Yaw_Calculate(void)
 {
     float Proportion;
@@ -159,7 +159,7 @@ void PID_Yaw_Calculate(void)
     float Derivative;
     float Error, Output;
 
-    // Yaw角不做外环，直接使用内环
+    // Yaw does not need outer ring, so use inner ring directly
     Error = init_gz * 57.295780 - Motor_Rud;
     
     Yaw_Err_Sum += Error;
@@ -195,22 +195,22 @@ void PID_Yaw_Calculate(void)
 
 void Motor_Calculate(void)
 {
-    // 获取PID更新时间
+    // Get PID update time
     Time_dt = Get_PID_Time();
 
-    // 三轴PID计算
+    // XYZ PID calculation
     PID_Roll_Calculate();
     PID_Pitch_Calculate();
     PID_Yaw_Calculate();
 
-    // X模式电机转速融合公式
-    // 从1-4分别为：左前顺时针、右前逆时针、左后逆时针、右后顺时针
+    // Motor speed fusion formula in X mode
+    // From 1-4 are: clockwise left front, counterclockwise right front, counterclockwise left rear, clockwise right rear
     Motor_1 = (uint16_t)Limit_PWM(Motor_Thr - PID_Pitch - PID_Roll - PID_Yaw);
     Motor_2 = (uint16_t)Limit_PWM(Motor_Thr - PID_Pitch + PID_Roll + PID_Yaw);
     Motor_3 = (uint16_t)Limit_PWM(Motor_Thr + PID_Pitch - PID_Roll + PID_Yaw);
     Motor_4 = (uint16_t)Limit_PWM(Motor_Thr + PID_Pitch + PID_Roll - PID_Yaw);
     
-    // 起飞前电机转速安全保护
+    // Motor speed safety protection before takeoff
     if(Motor_Thr <= 1050)
     {
         Motor_1 = 1000;
@@ -220,7 +220,7 @@ void Motor_Calculate(void)
     }
 }
 
-// PWM输出限幅
+// PWM output limit
 float Limit_PWM(float accelerator)
 {
     if(accelerator > PWM_OUT_MAX)
@@ -239,10 +239,10 @@ float Limit_PWM(float accelerator)
     return accelerator;
 }
 
-// 遥控值处理计算
-void Motor_Expectation_Calculate(uint16_t ch1,uint16_t ch2,uint16_t ch3,uint16_t ch4)
+// Remote control value calculation
+void Motor_Expectation_Calculate(uint16_t ch1, uint16_t ch2, uint16_t ch3, uint16_t ch4)
 {
-    // 遥控值限幅
+    // Remote control value limit
     if(ch1 < 1000) { ch1=1000; }
     if(ch1 > 2000) { ch1=2000; }
 
@@ -255,7 +255,8 @@ void Motor_Expectation_Calculate(uint16_t ch1,uint16_t ch2,uint16_t ch3,uint16_t
     if(ch4 < 1000) { ch4=1000; }
     if(ch4 > 2000) { ch4=2000; }
 
-    // 三通道遥控值零偏处理及范围缩小，油门通道数值不处理
+    // Three-channel remote control value zero offset processing and range reduction
+    // (Throttle channel value is not processed)
     Motor_Ail = (float)((ch1 - Ail_Mid) * 0.06);
     Motor_Ele = (float)((ch2 - Ele_Mid) * 0.06);
     Motor_Thr = (float)ch3;

@@ -1,9 +1,9 @@
 #include "stm32f4xx.h"
 
-// 变量链接
+// Extern variables
 extern uint16_t PWMInCh1, PWMInCh2, PWMInCh3, PWMInCh4;
 
-// 函数定义
+// Functions definition
 void PWM_Out_Init(void);
 void PWM_Output(uint16_t DR1,uint16_t DR2,uint16_t DR3,uint16_t DR4);
 void PWM_In_Init(void);

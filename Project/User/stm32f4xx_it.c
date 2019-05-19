@@ -44,20 +44,20 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
-// 各通道捕获状态
+// Capture status of channels
 unsigned char TIM2CH1_CAPTURE_STA = 1;
 unsigned char TIM3CH1_CAPTURE_STA = 1;
 unsigned char TIM3CH2_CAPTURE_STA = 1;
 unsigned char TIM3CH3_CAPTURE_STA = 1;
 unsigned char TIM3CH4_CAPTURE_STA = 1;
 
-// 上升沿下降沿数据
+// Rising edge/falling edge data
 uint16_t TIM3CH1_Rise, TIM3CH1_Fall,
          TIM3CH2_Rise, TIM3CH2_Fall,
          TIM3CH3_Rise, TIM3CH3_Fall,
          TIM3CH4_Rise, TIM3CH4_Fall;
 
-// 溢出处理变量
+// Overflow processing variable
 uint16_t TIM3_T;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,30 +75,30 @@ uint16_t TIM3_T;
 void TIM3_IRQHandler(void)
 {
     // CH1 - AIL - Roll
-    // 捕获到事件
+    // Capture the interrupt
     if (TIM_GetITStatus(TIM3, TIM_IT_CC1) != RESET)
     {
-        // 清除中断标志位
+        // Clear interrupt flag
         TIM_ClearITPendingBit(TIM3, TIM_IT_CC1);
-        // 捕获到上升沿
+        // Capture the rising edge
         if(TIM3CH1_CAPTURE_STA == 1)
         {
-            // 获取上升沿数据
+            // Get the data of rising edge
             TIM3CH1_Rise = TIM_GetCapture1(TIM3);
-            // 状态标志变为下降沿
+            // Change capture status to falling edge
             TIM3CH1_CAPTURE_STA = 0;
-            // 设置为下降沿捕获
+            // Set to capture on falling edge
             TIM_OC1PolarityConfig(TIM3, TIM_ICPolarity_Falling);
         }
-        // 捕获到下降沿
+        // Capture the falling edge
         else
         {
-            // 获取下降沿数据
+            // Get the data of falling edge
             TIM3CH1_Fall = TIM_GetCapture1(TIM3);
-            // 状态标志变为上升沿
+            // Change capture status to rising edge
             TIM3CH1_CAPTURE_STA = 1;
 
-            // 溢出处理
+            // Overflow processing
             if(TIM3CH1_Fall < TIM3CH1_Rise)
             {
                 TIM3_T = 65535;
@@ -108,9 +108,9 @@ void TIM3_IRQHandler(void)
                 TIM3_T = 0;
             }
 
-            // 下降沿减去上升沿得到总的高电平时间
+            // Falling edge time minus rising edge time to get high-level time
             PWMInCh1 = TIM3CH1_Fall - TIM3CH1_Rise + TIM3_T;
-            // 设置为上升沿捕获
+            // Set to capture on rising edge
             TIM_OC1PolarityConfig(TIM3, TIM_ICPolarity_Rising);
         }
     }
@@ -208,18 +208,18 @@ void USART2_IRQHandler(void)
 {
     static uint8_t Rxcnt=0;
 
-    // 捕获到事件
+    // Capture the interrupt
     if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
     {
-        // 清除标志位和中断标志位
+        // Clear interrupt flag
         USART_ClearFlag(USART2,USART_FLAG_RXNE); 
         USART_ClearITPendingBit(USART2, USART_IT_RXNE); 
 
-        // 获取串口接收数据
+        // Receive data from serial port
         ComRxBuffer[Rxcnt] = (uint8_t)USART_ReceiveData(USART2);
-        // 下标递增
+        // Increase the count
         Rxcnt++;
-        // 若32位命令接收完毕则重新接收
+        // Clear count after 32 bits command is received
         if(Rxcnt == 4)
         {
             Rxcnt = 0;

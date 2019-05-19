@@ -1,11 +1,11 @@
 #include "stm32f4xx.h"
 
-// 变量链接
+// Extern variables
 extern uint16_t Motor_1, Motor_2, Motor_3, Motor_4;
 extern float Alt_Err_Sum;
 extern float Alt_Err_Last;
 
-// 函数定义
+// Functions definition
 void Motor_Calculate(void);
 float Limit_PWM(float accelerator);
 void Once_Motor_Mid_Cal(uint16_t ch1, uint16_t ch2, uint16_t ch4);
